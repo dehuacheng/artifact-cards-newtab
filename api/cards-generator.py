@@ -13,6 +13,8 @@ CARD_SETS = ['00', '01']
 # Ignore Pathing & Ancient cards
 BLACKLISTED_CARD = [1000, 1001, 1002, 1003, 1004, 1005, 1007]
 
+# Set Language Option
+LANG = 'schinese'
 
 # Get JSON from URL
 def get_json(url):
@@ -49,7 +51,7 @@ def get_card_set(url):
         # Use only needed data
         simple_card = {
             'card_id': card['card_id'],
-            'card_name': card['card_name']['english'],
+            'card_name': card['card_name'][LANG],
         }
 
         if card['card_type'] == 'Hero':
@@ -57,7 +59,7 @@ def get_card_set(url):
 
         if card['card_type'] in ['Ability', 'Passive Ability']:
             simple_card['card_type'] = card['card_type']
-            simple_card['card_text'] = strip_html_tags(card['card_text']['english'])
+            simple_card['card_text'] = strip_html_tags(card['card_text'][LANG])
 
         add_if_key_exists(card['large_image'], 'default', simple_card, 'large_image')
 
