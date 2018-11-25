@@ -3,6 +3,8 @@
 # Generate cards database (extension/db/cards.js) from Artifact API
 # Artifact API: https://github.com/ValveSoftware/ArtifactDeckCode/
 
+from __future__ import print_function
+
 import requests
 import json
 import re
@@ -17,6 +19,8 @@ BLACKLISTED_CARD = [1000, 1001, 1002, 1003, 1004, 1005, 1007]
 LANG = 'schinese'
 
 # Get JSON from URL
+
+
 def get_json(url):
     r = requests.get(url)
     return r.json()
@@ -40,7 +44,7 @@ def strip_html_tags(text):
 
 # Read card set data from API
 def get_card_set(url):
-    print "Getting Card set {}".format(url)
+    print("Getting Card set {}".format(url))
 
     # Get JSON data
     json_obj = get_json(url)
@@ -61,10 +65,12 @@ def get_card_set(url):
             simple_card['card_type'] = card['card_type']
             simple_card['card_text'] = strip_html_tags(card['card_text'][LANG])
 
-        add_if_key_exists(card['large_image'], 'default', simple_card, 'large_image')
+        add_if_key_exists(card['large_image'], LANG,
+                          simple_card, 'large_image')
 
         if 'large_image' in simple_card:
-            simple_card['large_image'] = re.sub('https://steamcdn-a.akamaihd.net/apps/583950', '', simple_card['large_image'])
+            simple_card['large_image'] = re.sub(
+                'https://steamcdn-a.akamaihd.net/apps/583950', '', simple_card['large_image'])
 
         cards[simple_card['card_id']] = simple_card
 
@@ -73,6 +79,7 @@ def get_card_set(url):
 
 # Merge spell & ability cards to its parent
 def update_card_references(cards):
+    to_remove = []
     for card_id in cards.keys():
         if card_id not in cards:
             continue
@@ -105,18 +112,19 @@ def update_card_references(cards):
                     'type': ref_card['card_type'],
                     'text': ref_card['card_text'],
                 }
-
                 card['card_abilities'].append(ability)
 
-            # Remove reference card from the set
-            cards.pop(ref_card_id, None)
-
+            to_remove.append(ref_card_id)
         card.pop('references', None)
+
+    # Remove reference card from the set
+    for card_id in to_remove:
+        cards.pop(card_id, None)
 
 
 # Save cards data into cards.js for the extension
 def save_cards_to_file(cards):
-    with open("extension/db/cards.js", "w") as f:
+    with open("extension/db/cards.js", "w+") as f:
         cards_json = json.dumps(cards)
         f.write('var CARDS = ' + cards_json)
 
@@ -132,7 +140,7 @@ def main():
         update_card_references(cards)
 
         # Store cards into a list
-        for card_id, card in cards.iteritems():
+        for card_id, card in cards.items():
             # Ignore blacklisted cards
             if card_id in BLACKLISTED_CARD:
                 continue
@@ -146,7 +154,7 @@ def main():
     # Save to file
     save_cards_to_file(all_cards)
 
-    print "Saved {} cards.".format(len(all_cards))
+    print("Saved {} cards.".format(len(all_cards)))
 
 
 if __name__ == "__main__":
