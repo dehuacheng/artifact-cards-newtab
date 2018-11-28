@@ -2,7 +2,7 @@
     "name": "Artifact Cards for New Tab (CN/中文)",
     "author": "redphx",
     "description": "Display random Artifact cards in new tab page, author: redphx",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "manifest_version": 2,
 
     "icons": {
